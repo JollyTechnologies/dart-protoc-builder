@@ -7,8 +7,12 @@ import 'package:path/path.dart' as path;
 
 /// A non-intrusive [Directory] that can be used to extract Protobuf related
 /// files for later.
+///
+/// Absolute so that derived tool paths (protoc, protoc plugin) stay valid
+/// when processes are spawned with a different working directory, e.g. the
+/// package root in workspace builds.
 final Directory temporaryDirectory =
-    Directory(path.join('.dart_tool', 'build', 'protoc_builder'));
+    Directory(path.join('.dart_tool', 'build', 'protoc_builder')).absolute;
 
 /// Downloads a ZIP archive from a specified [Uri] into memory, unpacks the
 /// archive, and then stores all files contained within in the [target]
