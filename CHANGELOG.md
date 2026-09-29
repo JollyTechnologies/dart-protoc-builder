@@ -1,3 +1,8 @@
+## Unreleased
+
+- Add opt-in `descriptor_set` option that also emits a `{{}}.pbdesc` FileDescriptorSet
+  (with source info) per proto for downstream builders
+
 ## 0.4.1
 
 - Fix race conditions (thank you to [TomKrauss](https://github.com/TomKrauss)!)

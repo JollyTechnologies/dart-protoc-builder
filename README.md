@@ -68,6 +68,10 @@ targets:
           # Whether the protoc_plugin Dart scripts should be precompiled for better performance.
           # (Default: true)
           precompile_protoc_plugin: true
+          # Also write a `.pbdesc` FileDescriptorSet (with source info) next to the
+          # generated Dart files, for downstream builders that read proto options.
+          # (Default: false)
+          descriptor_set: false
 ```
 
 ## Running
