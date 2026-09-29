@@ -25,6 +25,7 @@ class ProtocBuilder implements Builder {
   static const defaultGrpcEnabled = false;
   static const defaultUseInstalledProtoc = false;
   static const defaultPrecompileProtocPlugin = true;
+  static const defaultDescriptorSet = false;
 
   ProtocBuilder(this.options)
       : protobufVersion = options.config['protobuf_version'] as String? ??
@@ -46,7 +47,9 @@ class ProtocBuilder implements Builder {
             defaultUseInstalledProtoc,
         precompileProtocPlugin =
             options.config['precompile_protoc_plugin'] as bool? ??
-                defaultPrecompileProtocPlugin;
+                defaultPrecompileProtocPlugin,
+        descriptorSet =
+            options.config['descriptor_set'] as bool? ?? defaultDescriptorSet;
 
   final BuilderOptions options;
 
@@ -58,6 +61,7 @@ class ProtocBuilder implements Builder {
   final bool grpcEnabled;
   final bool useInstalledProtoc;
   final bool precompileProtocPlugin;
+  final bool descriptorSet;
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -148,11 +152,20 @@ class ProtocBuilder implements Builder {
       if (protocPlugin.path.isNotEmpty)
         '--plugin=protoc-gen-dart=${protocPlugin.path}',
       '--dart_out=$pluginParameters${path.join('.', outputDirectory)}',
+      if (descriptorSet) ...[
+        '--descriptor_set_out=${path.join('.', outputDirectory, _descriptorSetPath(inputPath))}',
+        '--include_source_info',
+      ],
       ...protoPaths
           .map((protoPath) => '--proto_path=${path.join('.', protoPath)}'),
       path.join('.', inputPath),
     ];
   }
+
+  /// The `.pbdesc` path of [inputPath] relative to [outputDirectory], matching
+  /// the `{{}}` capture of [buildExtensions].
+  String _descriptorSetPath(String inputPath) => path.setExtension(
+      path.relative(inputPath, from: path.normalize(rootDirectory)), '.pbdesc');
 
   @override
   Map<String, List<String>> get buildExtensions {
@@ -163,6 +176,7 @@ class ProtocBuilder implements Builder {
         '$outputDirectory/{{}}.pbjson.dart',
         if (!grpcEnabled) '$outputDirectory/{{}}.pbserver.dart',
         if (grpcEnabled) '$outputDirectory/{{}}.pbgrpc.dart',
+        if (descriptorSet) '$outputDirectory/{{}}.pbdesc',
       ],
     };
   }
